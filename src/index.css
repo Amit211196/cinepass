@@ -1575,6 +1575,188 @@ button, input, select, textarea {
   font-weight: 600;
 }
 
+/* --- FOOTER --- */
+.footer {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border-glass);
+  padding: 24px 20px;
+  margin-top: auto; /* push footer to bottom of layout */
+  text-align: center;
+  z-index: 10;
+}
+
+.footer-container {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  font-size: 0.85rem;
+  color: var(--color-text-muted);
+}
+
+.footer-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--font-heading);
+  font-weight: 800;
+  font-size: 1.1rem;
+  color: #fff;
+}
+
+/* --- MOBILE RESPONSIVENESS MEDIA QUERIES --- */
+@media (max-width: 768px) {
+  .main-content {
+    padding-top: 70px;
+    padding-left: 12px;
+    padding-right: 12px;
+    padding-bottom: 80px; /* Allow scrolling past the bottom card */
+  }
+  .navbar-logo span {
+    font-size: 1.3rem;
+  }
+}
+
+@media (max-width: 640px) {
+  .navbar-container {
+    padding: 0 12px;
+  }
+  .navbar-links {
+    gap: 8px;
+  }
+  .nav-link {
+    font-size: 0.8rem;
+    padding: 4px 6px;
+    gap: 4px;
+  }
+  .nav-icon {
+    width: 14px;
+    height: 14px;
+  }
+  .username {
+    display: none;
+  }
+  .btn-login span, .btn-logout span {
+    display: none;
+  }
+  .btn-login, .btn-logout {
+    padding: 6px;
+    border-radius: var(--radius-full);
+    width: 32px;
+    height: 32px;
+    justify-content: center;
+  }
+  .user-badge {
+    padding: 4px 8px;
+  }
+  .admin-tag {
+    font-size: 0.65rem;
+    padding: 0px 4px;
+  }
+}
+
+@media (max-width: 576px) {
+  .hero-content h1 {
+    font-size: 2.2rem;
+  }
+  .hero-content p {
+    font-size: 0.9rem;
+  }
+  .hero-overlay {
+    padding: 20px;
+  }
+  .home-hero .hero-bg {
+    height: 240px;
+  }
+  .filter-bar {
+    padding: 12px;
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .search-box {
+    max-width: 100%;
+  }
+  .movie-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+  .movie-card-info {
+    padding: 10px;
+  }
+  .movie-card-title {
+    font-size: 0.95rem;
+  }
+  .movie-card-genre {
+    font-size: 0.75rem;
+  }
+  .movie-card-meta {
+    font-size: 0.75rem;
+    gap: 8px;
+    margin-bottom: 12px;
+  }
+  .movie-card-btn {
+    padding: 6px 12px;
+    font-size: 0.8rem;
+  }
+  .detail-title {
+    font-size: 2rem;
+    text-align: center;
+  }
+  .detail-badges {
+    justify-content: center;
+  }
+  .detail-synopsis-section, .detail-cast-section {
+    text-align: center;
+  }
+  .booking-info {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+  }
+  .booking-seats-display {
+    justify-content: center;
+  }
+  .booking-status-actions {
+    align-items: center;
+    width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .seat {
+    width: 25px;
+    height: 25px;
+    font-size: 0.65rem;
+    border-radius: 4px;
+  }
+  .seat-row {
+    gap: 5px;
+  }
+  .row-label {
+    width: 12px;
+    font-size: 0.75rem;
+  }
+  .seating-legend {
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .seating-chart-panel {
+    padding: 30px 10px;
+  }
+  .screen-label {
+    letter-spacing: 2px;
+    margin-bottom: 25px;
+  }
+  .auth-body {
+    padding: 24px 16px;
+  }
+}
+
 /* --- PRINT MEDIA STYLES --- */
 @media print {
   body * {

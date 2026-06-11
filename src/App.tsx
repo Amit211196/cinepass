@@ -13,6 +13,8 @@ import { MyBookings } from './pages/MyBookings';
 import { AdminPanel } from './pages/AdminPanel';
 import { LoginRegister } from './pages/LoginRegister';
 
+import { Footer } from './components/Footer';
+
 function App() {
   return (
     <BrowserRouter>
@@ -60,6 +62,7 @@ function App() {
                 <Route path="*" element={<Home />} />
               </Routes>
             </main>
+            <Footer />
           </div>
         </AuthProvider>
       </ToastProvider>
