@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: cinepass
+  profiles:
+    active: dev
+
+  datasource:
+    url: jdbc:postgresql://localhost:5432/cinepass
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
