@@ -2,7 +2,7 @@ spring:
   application:
     name: cinepass
   profiles:
-    active: dev
+    active: dev # default profile
 
   datasource:
     url: jdbc:postgresql://localhost:5432/cinepass

@@ -1,5 +1,5 @@
 spring:
-  datasource:
+  datasource: # H2 database for dev environment
     url: jdbc:h2:mem:cinepass
     username: sa
     password: password
