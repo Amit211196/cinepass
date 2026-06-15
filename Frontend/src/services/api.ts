@@ -289,54 +289,109 @@ const seedInitialData = () => {
 seedInitialData();
 
 // API Service Implementation
+const BASE_URL = 'http://localhost:8080/api';
+
+const getAuthHeaders = (): Record<string, string> => {
+  const currentUser = getStorage<{ token: string } | null>(KEYS.CURRENT_USER, null);
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json'
+  };
+  if (currentUser && currentUser.token) {
+    headers['Authorization'] = `Bearer ${currentUser.token}`;
+  }
+  return headers;
+};
+
+const mapGenreToBackend = (genre: string): string => {
+  const mapping: { [key: string]: string } = {
+    'sci-fi': 'SCI_FI',
+    'action': 'ACTION',
+    'animation': 'ANIMATION',
+    'comedy': 'COMEDY',
+    'drama': 'DRAMA',
+    'horror': 'HORROR',
+    'romance': 'ROMANCE',
+    'thriller': 'THRILLER'
+  };
+  return mapping[genre.toLowerCase()] || genre.toUpperCase();
+};
+
+const mapGenreToFrontend = (genre: string): string => {
+  const mapping: { [key: string]: string } = {
+    'SCI_FI': 'Sci-Fi',
+    'ACTION': 'Action',
+    'ANIMATION': 'Animation',
+    'COMEDY': 'Comedy',
+    'DRAMA': 'Drama',
+    'HORROR': 'Horror',
+    'ROMANCE': 'Romance',
+    'THRILLER': 'Thriller'
+  };
+  return mapping[genre.toUpperCase()] || genre;
+};
+
+const mapMovieToFrontend = (m: any): Movie => {
+  return {
+    id: String(m.id),
+    title: m.title,
+    genre: mapGenreToFrontend(m.genre),
+    durationMins: m.durationMins || 120,
+    rating: m.rating || 'U/A',
+    posterUrl: m.posterUrl || 'https://images.unsplash.com/photo-1534447677768-be436bb09401?q=80&w=600&auto=format&fit=crop',
+    synopsis: m.synopsis || m.description || 'No description available.',
+    cast: m.castText || 'Cast details not specified.',
+    createdAt: new Date().toISOString(),
+  };
+};
+
+// API Service Implementation
 export const api = {
   // --- AUTH ENDPOINTS ---
   auth: {
     register: async (email: string, name: string, passwordHash: string): Promise<User> => {
-      await delay(400);
-      const users = getStorage<any[]>(KEYS.USERS, []);
-      
-      if (users.some(u => u.email.toLowerCase() === email.toLowerCase())) {
-        throw new Error('Email already registered');
+      const response = await fetch(`${BASE_URL}/auth/register`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, email, password: passwordHash })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to register');
       }
-
-      const newUser = {
-        id: uuid(),
-        email: email.toLowerCase(),
-        password: passwordHash, // Store plain text/simulated BCrypt
-        name,
-        isAdmin: false,
-        createdAt: new Date().toISOString(),
+      const data = await response.json();
+      return {
+        id: data.email,
+        email: data.email,
+        name: data.name,
+        isAdmin: data.isAdmin,
+        createdAt: new Date().toISOString()
       };
-
-      users.push(newUser);
-      setStorage(KEYS.USERS, users);
-
-      // Return user without password
-      const { password, ...userWithoutPassword } = newUser;
-      return userWithoutPassword;
     },
 
     login: async (email: string, passwordHash: string): Promise<{ token: string; user: User }> => {
-      await delay(400);
-      const users = getStorage<any[]>(KEYS.USERS, []);
-      const user = users.find(
-        u => u.email.toLowerCase() === email.toLowerCase() && u.password === passwordHash
-      );
-
-      if (!user) {
-        throw new Error('Invalid email or password');
+      const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password: passwordHash })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to login');
       }
-
-      const token = `jwt_mock_token_${uuid()}_${user.id}`;
-      const { password, ...userWithoutPassword } = user;
-      
-      setStorage(KEYS.CURRENT_USER, { token, user: userWithoutPassword });
-      return { token, user: userWithoutPassword };
+      const data = await response.json();
+      const user: User = {
+        id: data.email,
+        email: data.email,
+        name: data.name,
+        isAdmin: data.isAdmin,
+        createdAt: new Date().toISOString()
+      };
+      const result = { token: data.token, user };
+      setStorage(KEYS.CURRENT_USER, result);
+      return result;
     },
 
     logout: async (): Promise<void> => {
-      await delay(200);
       localStorage.removeItem(KEYS.CURRENT_USER);
     },
 
@@ -348,68 +403,89 @@ export const api = {
   // --- MOVIES ENDPOINTS ---
   movies: {
     getAll: async (genre?: string): Promise<Movie[]> => {
-      await delay(300);
-      const movies = getStorage<Movie[]>(KEYS.MOVIES, []);
+      let url = `${BASE_URL}/movies`;
       if (genre && genre !== 'All') {
-        return movies.filter(m => m.genre.toLowerCase() === genre.toLowerCase());
+        url += `?genre=${mapGenreToBackend(genre)}`;
       }
-      return movies;
+      const response = await fetch(url, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch movies');
+      }
+      const list = await response.json();
+      return list.map(mapMovieToFrontend);
     },
 
     getById: async (id: string): Promise<Movie> => {
-      await delay(200);
-      const movies = getStorage<Movie[]>(KEYS.MOVIES, []);
-      const movie = movies.find(m => m.id === id);
-      if (!movie) {
+      const response = await fetch(`${BASE_URL}/movies/${id}`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
         throw new Error('Movie not found');
       }
-      return movie;
+      const m = await response.json();
+      return mapMovieToFrontend(m);
     },
 
     create: async (movieData: Omit<Movie, 'id' | 'createdAt'>): Promise<Movie> => {
-      await delay(400);
-      const movies = getStorage<Movie[]>(KEYS.MOVIES, []);
-      const newMovie: Movie = {
-        ...movieData,
-        id: `movie-${uuid()}`,
-        createdAt: new Date().toISOString(),
-      };
-      movies.push(newMovie);
-      setStorage(KEYS.MOVIES, movies);
-      return newMovie;
+      const response = await fetch(`${BASE_URL}/movies`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          title: movieData.title,
+          description: movieData.synopsis,
+          genre: mapGenreToBackend(movieData.genre),
+          releaseDate: new Date().toISOString().split('T')[0],
+          durationMins: movieData.durationMins,
+          rating: movieData.rating,
+          posterUrl: movieData.posterUrl,
+          synopsis: movieData.synopsis,
+          castText: movieData.cast
+        })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to create movie');
+      }
+      const created = await response.json();
+      return mapMovieToFrontend(created);
     },
 
     update: async (id: string, movieData: Partial<Omit<Movie, 'id' | 'createdAt'>>): Promise<Movie> => {
-      await delay(400);
-      const movies = getStorage<Movie[]>(KEYS.MOVIES, []);
-      const index = movies.findIndex(m => m.id === id);
-      if (index === -1) {
-        throw new Error('Movie not found');
+      const existingMovie = await api.movies.getById(id);
+      const merged = { ...existingMovie, ...movieData };
+      const response = await fetch(`${BASE_URL}/movies/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          title: merged.title,
+          description: merged.synopsis,
+          genre: mapGenreToBackend(merged.genre),
+          releaseDate: new Date().toISOString().split('T')[0],
+          durationMins: merged.durationMins,
+          rating: merged.rating,
+          posterUrl: merged.posterUrl,
+          synopsis: merged.synopsis,
+          castText: merged.cast
+        })
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || 'Failed to update movie');
       }
-      const updatedMovie = {
-        ...movies[index],
-        ...movieData,
-      };
-      movies[index] = updatedMovie;
-      setStorage(KEYS.MOVIES, movies);
-      return updatedMovie;
+      const updated = await response.json();
+      return mapMovieToFrontend(updated);
     },
 
     delete: async (id: string): Promise<void> => {
-      await delay(300);
-      let movies = getStorage<Movie[]>(KEYS.MOVIES, []);
-      movies = movies.filter(m => m.id !== id);
-      setStorage(KEYS.MOVIES, movies);
-
-      // Cascade delete: clean up showtimes and bookings for this movie
-      let showtimes = getStorage<Showtime[]>(KEYS.SHOWTIMES, []);
-      const showtimeIdsToDelete = showtimes.filter(s => s.movieId === id).map(s => s.id);
-      showtimes = showtimes.filter(s => s.movieId !== id);
-      setStorage(KEYS.SHOWTIMES, showtimes);
-
-      let bookings = getStorage<Booking[]>(KEYS.BOOKINGS, []);
-      bookings = bookings.filter(b => !showtimeIdsToDelete.includes(b.showtimeId));
-      setStorage(KEYS.BOOKINGS, bookings);
+      const response = await fetch(`${BASE_URL}/movies/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete movie');
+      }
     }
   },
 

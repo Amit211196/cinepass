@@ -42,13 +42,33 @@ public class Movie {
     private LocalDate releaseDate;
 
     @Column(nullable = false)
+    private int durationMins;
+
+    @Column(nullable = false)
+    private String rating;
+
+    @Column(nullable = false, length = 1000)
+    private String posterUrl;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String synopsis;
+
+    @Column(nullable = false, columnDefinition = "TEXT")
+    private String castText;
+
+    @Column(nullable = false)
     private boolean active;
 
-    public Movie(String title, String description, Genre genre, LocalDate releaseDate, boolean active) {
+    public Movie(String title, String description, Genre genre, LocalDate releaseDate, int durationMins, String rating, String posterUrl, String synopsis, String castText, boolean active) {
         this.title = title;
         this.description = description;
         this.genre = genre;
         this.releaseDate = releaseDate;
+        this.durationMins = durationMins;
+        this.rating = rating;
+        this.posterUrl = posterUrl;
+        this.synopsis = synopsis;
+        this.castText = castText;
         this.active = active;
     }
 }
