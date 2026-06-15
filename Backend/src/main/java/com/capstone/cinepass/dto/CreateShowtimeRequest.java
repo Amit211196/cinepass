@@ -5,8 +5,7 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.UUID;
 
-public record ShowTimeResponse(
-        UUID id,
+public record CreateShowtimeRequest(
         UUID movieId,
         String theatreName,
         LocalDate showDate,

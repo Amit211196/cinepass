@@ -6,27 +6,25 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import lombok.Getter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "movies")
-@Getter
-@Setter
+@Data
 @NoArgsConstructor
+@AllArgsConstructor
 public class Movie {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "movie_seq_gen")
-    @SequenceGenerator(name = "movie_seq_gen", sequenceName = "movie_sequence", allocationSize = 1)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @Column(nullable = false)
     private String title;

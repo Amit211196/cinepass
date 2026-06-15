@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/movies")
@@ -39,19 +40,19 @@ public class MovieController {
     }
 
     @GetMapping("/{id}")
-    public MovieDetailResponse getMovieDetails(@PathVariable Long id) {
+    public MovieDetailResponse getMovieDetails(@PathVariable UUID id) {
         return movieService.getMovieDetails(id);
     }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public MovieDetailResponse updateMovie(@PathVariable Long id, @RequestBody UpdateMovieRequest request) {
+    public MovieDetailResponse updateMovie(@PathVariable UUID id, @RequestBody UpdateMovieRequest request) {
         return movieService.updateMovie(id, request);
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
-    public void deleteMovie(@PathVariable Long id) {
+    public void deleteMovie(@PathVariable UUID id) {
         movieService.deleteMovie(id);
     }
 }
