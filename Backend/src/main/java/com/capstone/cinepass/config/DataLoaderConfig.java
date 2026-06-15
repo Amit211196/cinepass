@@ -55,12 +55,12 @@ public class DataLoaderConfig {
 
                 // 2. Create Movies
                 List<Movie> movies = new ArrayList<>();
-                movies.add(new Movie("Interstellar", "A team of explorers travel through a wormhole in space", Genre.SCI_FI, LocalDate.of(2014, 11, 7), true));
-                movies.add(new Movie("The Lion King", "A young lion prince flees his kingdom after his father's death", Genre.DRAMA, LocalDate.of(2019, 7, 9), true));
-                movies.add(new Movie("Inception", "A thief who steals corporate secrets through dream-sharing technology", Genre.SCI_FI, LocalDate.of(2010, 7, 16), true));
-                movies.add(new Movie("The Dark Knight", "Batman must accept psychological and physical tests to fight injustice", Genre.ACTION, LocalDate.of(2008, 7, 18), true));
-                movies.add(new Movie("Avatar: The Way of Water", "Jake Sully and family on the planet Pandora facing familiar threats", Genre.ACTION, LocalDate.of(2022, 12, 16), true));
-                movies.add(new Movie("Spirited Away", "A girl enters a magical world of gods, witches and spirits", Genre.DRAMA, LocalDate.of(2001, 7, 20), true));
+                movies.add(new Movie("Interstellar", "A team of explorers travel through a wormhole in space", Genre.SCI_FI, LocalDate.of(2014, 11, 7), true,"https://image.tmdb.org/t/p/w500/rAiYTfKGqDCRIIqo664sY9XZIvQ.jpg"));
+                movies.add(new Movie("The Lion King", "A young lion prince flees his kingdom after his father's death", Genre.DRAMA, LocalDate.of(2019, 7, 9), true, "https://image.tmdb.org/t/p/w500/2bXbqYdUdNVa8VIWXVfclP2ICtT.jpg"));
+                movies.add(new Movie("Inception", "A thief who steals corporate secrets through dream-sharing technology", Genre.SCI_FI, LocalDate.of(2010, 7, 16), true, "https://image.tmdb.org/t/p/w500/oYuLEt3zVCKq57qu2F8dT7NIa6f.jpg"));
+                movies.add(new Movie("The Dark Knight", "Batman must accept psychological and physical tests to fight injustice", Genre.ACTION, LocalDate.of(2008, 7, 18), true, "https://image.tmdb.org/t/p/w500/qJ2tW6WMUDux911r6m7haRef0WH.jpg"));
+                movies.add(new Movie("Avatar: The Way of Water", "Jake Sully and family on the planet Pandora facing familiar threats", Genre.ACTION, LocalDate.of(2022, 12, 16), true, "https://image.tmdb.org/t/p/w500/t6HIqrRAclMCA60NsSmeqe9RmNV.jpg"));
+                movies.add(new Movie("Spirited Away", "A girl enters a magical world of gods, witches and spirits", Genre.DRAMA, LocalDate.of(2001, 7, 20), true, "https://image.tmdb.org/t/p/w500/39wmItIWsg5sZMyRUHLkWBcuVCM.jpg"));
                 List<Movie> savedMovies = movieRepository.saveAll(movies);
                 log.info("Created {} movies", savedMovies.size());
 

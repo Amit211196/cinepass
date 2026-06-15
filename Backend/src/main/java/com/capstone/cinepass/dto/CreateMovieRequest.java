@@ -4,5 +4,5 @@ import com.capstone.cinepass.constant.Genre;
 
 import java.time.LocalDate;
 
-public record CreateMovieRequest(String title, String description, Genre genre, LocalDate releaseDate) {
+public record CreateMovieRequest(String title, String description, Genre genre, LocalDate releaseDate, String posterUrl) {
 }

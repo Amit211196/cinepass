@@ -42,11 +42,15 @@ public class Movie {
     @Column(nullable = false)
     private boolean active;
 
-    public Movie(String title, String description, Genre genre, LocalDate releaseDate, boolean active) {
+    @Column(name = "POSTER_URL")
+    private String posterUrl;
+
+    public Movie(String title, String description, Genre genre, LocalDate releaseDate, boolean active,String posterUrl) {
         this.title = title;
         this.description = description;
         this.genre = genre;
         this.releaseDate = releaseDate;
         this.active = active;
+        this.posterUrl = posterUrl;
     }
 }
