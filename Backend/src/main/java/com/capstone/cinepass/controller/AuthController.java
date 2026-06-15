@@ -1,11 +1,11 @@
 package com.capstone.cinepass.controller;
 
 import com.capstone.cinepass.dto.AuthResponse;
+import com.capstone.cinepass.dto.LoginRequest;
 import com.capstone.cinepass.dto.RegisterRequest;
 import com.capstone.cinepass.service.AuthService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,7 +20,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<AuthResponse> register(@RequestBody RegisterRequest registerRequest) {
-        return ResponseEntity.ok(authService.register(registerRequest));
+    public AuthResponse register(@RequestBody RegisterRequest registerRequest) {
+        return authService.register(registerRequest);
+    }
+
+    @PostMapping("/login")
+    public AuthResponse login(@RequestBody LoginRequest loginRequest) {
+        return authService.login(loginRequest);
     }
 }
