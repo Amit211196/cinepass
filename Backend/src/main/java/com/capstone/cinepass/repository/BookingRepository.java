@@ -9,17 +9,16 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 @Repository
-public interface BookingRepository extends JpaRepository<Booking, UUID> {
+public interface BookingRepository extends JpaRepository<Booking, Long> {
 
     @EntityGraph(attributePaths = {"showtime", "user", "seats"})
-    List<Booking> findByUser_IdOrderByBookedAtDesc(UUID userId);
+    List<Booking> findByUser_IdOrderByBookedAtDesc(Long userId);
 
     @EntityGraph(attributePaths = {"showtime", "user", "seats"})
     @Query("select b from Booking b where b.id = :id")
-    Optional<Booking> findWithDetailsById(@Param("id") UUID id);
+    Optional<Booking> findWithDetailsById(@Param("id") Long id);
 
     @EntityGraph(attributePaths = {"showtime", "user", "seats"})
     List<Booking> findAll();

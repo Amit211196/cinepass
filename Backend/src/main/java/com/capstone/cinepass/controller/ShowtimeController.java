@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/showtimes")
@@ -41,7 +40,7 @@ public class ShowtimeController {
 
     @GetMapping("/movie/{movieId}")
     @Operation(summary = "Get showtimes for a movie")
-    public ResponseEntity<List<ShowTimeResponse>> getShowtimesByMovie(@PathVariable UUID movieId) {
+    public ResponseEntity<List<ShowTimeResponse>> getShowtimesByMovie(@PathVariable Long movieId) {
         return ResponseEntity.ok(showtimeService.getShowtimesByMovie(movieId));
     }
 
@@ -49,7 +48,7 @@ public class ShowtimeController {
     @PreAuthorize("hasRole('ADMIN')")
     @Operation(summary = "Delete a showtime (Admin only)")
     @SecurityRequirement(name = "bearerAuth")
-    public ResponseEntity<Void> deleteShowtime(@PathVariable UUID showtimeId) {
+    public ResponseEntity<Void> deleteShowtime(@PathVariable Long showtimeId) {
         showtimeService.deleteShowtime(showtimeId);
         return ResponseEntity.noContent().build();
     }

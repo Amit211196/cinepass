@@ -33,7 +33,6 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -64,15 +63,17 @@ class BookingServiceImplTest {
 
     private User currentUser;
     private Showtime showtime;
+    private long nextBookingId;
 
     @BeforeEach
     void setUp() {
+        nextBookingId = 300L;
         currentUser = new User(USER_EMAIL, "hashed-password", "Test User", false);
         ReflectionTestUtils.setField(currentUser, "id", 1L);
 
         showtime = Showtime.builder()
-                .id(UUID.randomUUID())
-                .movieId(UUID.randomUUID())
+                .id(100L)
+                .movieId(10L)
                 .theatreName("PVR Cinemas")
                 .showDate(LocalDate.now().plusDays(1))
                 .showTime(LocalTime.of(18, 30))
@@ -89,7 +90,7 @@ class BookingServiceImplTest {
     void createBookingCreatesConfirmedBookingWhenSeatsAreAvailable() {
         authenticate(USER_EMAIL);
         CreateBookingRequest request = new CreateBookingRequest(showtime.getId(), List.of(" a1 ", "a2"));
-        UUID bookingId = UUID.randomUUID();
+        Long bookingId = 200L;
 
         when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(currentUser));
         when(showtimeRepository.findById(showtime.getId())).thenReturn(Optional.of(showtime));
@@ -206,7 +207,7 @@ class BookingServiceImplTest {
 
     @Test
     void getBookedSeatsReturnsConfirmedSeatsOnly() {
-        UUID showtimeId = showtime.getId();
+        Long showtimeId = showtime.getId();
 
         when(showtimeRepository.existsById(showtimeId)).thenReturn(true);
         when(bookingSeatRepository.findSeatCodesByShowtimeIdAndBookingStatus(
@@ -221,7 +222,7 @@ class BookingServiceImplTest {
 
     @Test
     void getBookedSeatsRejectsUnknownShowtime() {
-        UUID showtimeId = showtime.getId();
+        Long showtimeId = showtime.getId();
         when(showtimeRepository.existsById(showtimeId)).thenReturn(false);
 
         assertThatThrownBy(() -> bookingService.getBookedSeats(showtimeId))
@@ -266,7 +267,7 @@ class BookingServiceImplTest {
     @Test
     void cancelBookingRejectsUnknownBooking() {
         authenticate(USER_EMAIL);
-        UUID bookingId = UUID.randomUUID();
+        Long bookingId = 404L;
 
         when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(currentUser));
         when(bookingRepository.findWithDetailsById(bookingId)).thenReturn(Optional.empty());
@@ -312,7 +313,7 @@ class BookingServiceImplTest {
 
     private Booking bookingWith(User user, Showtime showtime, BookingStatus status, OffsetDateTime bookedAt) {
         Booking booking = Booking.builder()
-                .id(UUID.randomUUID())
+                .id(nextBookingId++)
                 .user(user)
                 .showtime(showtime)
                 .status(status)

@@ -22,7 +22,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api")
@@ -45,7 +44,7 @@ public class BookingController {
 
     @GetMapping("/showtimes/{showtimeId}/seats")
     @Operation(summary = "Get booked seats for a showtime")
-    public ResponseEntity<List<String>> getBookedSeats(@PathVariable UUID showtimeId) {
+    public ResponseEntity<List<String>> getBookedSeats(@PathVariable Long showtimeId) {
         return ResponseEntity.ok(bookingService.getBookedSeats(showtimeId));
     }
 
@@ -57,7 +56,7 @@ public class BookingController {
 
     @DeleteMapping("/bookings/{bookingId}")
     @Operation(summary = "Cancel a booking")
-    public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable UUID bookingId) {
+    public ResponseEntity<CancelBookingResponse> cancelBooking(@PathVariable Long bookingId) {
         return ResponseEntity.ok(bookingService.cancelBooking(bookingId));
     }
 

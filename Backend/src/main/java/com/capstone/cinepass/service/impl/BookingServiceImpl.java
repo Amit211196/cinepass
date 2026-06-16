@@ -30,7 +30,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Set;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -74,7 +73,7 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<String> getBookedSeats(UUID showtimeId) {
+    public List<String> getBookedSeats(Long showtimeId) {
         if (!showtimeRepository.existsById(showtimeId)) {
             throw new ResourceNotFoundException("Showtime not found");
         }
@@ -95,7 +94,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public CancelBookingResponse cancelBooking(UUID bookingId) {
+    public CancelBookingResponse cancelBooking(Long bookingId) {
         User currentUser = getCurrentUser();
         Booking booking = bookingRepository.findWithDetailsById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
