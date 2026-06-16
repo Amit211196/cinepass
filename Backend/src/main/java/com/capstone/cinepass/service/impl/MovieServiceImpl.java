@@ -21,7 +21,7 @@ public class MovieServiceImpl implements MovieService {
 
     @Override
     public MovieResponse addMovie(CreateMovieRequest request) {
-        Movie movie = new Movie(request.title(), request.description(), request.genre(), request.releaseDate(), true);
+        Movie movie = new Movie(request.title(), request.description(), request.genre(), request.releaseDate(), true, request.posterUrl());
         Movie savedMovie = movieRepository.save(movie);
 
         return getMovieResponseFromMovie(savedMovie);
@@ -68,7 +68,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
     private MovieResponse getMovieResponseFromMovie(Movie movie) {
-        return new MovieResponse(movie.getId(), movie.getTitle(), movie.getGenre(), movie.getReleaseDate());
+        return new MovieResponse(movie.getId(), movie.getTitle(), movie.getGenre(), movie.getReleaseDate(), movie.getPosterUrl());
     }
 
     private MovieDetailResponse getMovieDetailResponseFromMovie(Movie movie) {
