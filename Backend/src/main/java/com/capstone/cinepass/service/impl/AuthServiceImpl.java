@@ -3,7 +3,6 @@ package com.capstone.cinepass.service.impl;
 import com.capstone.cinepass.dto.AuthResponse;
 import com.capstone.cinepass.dto.LoginRequest;
 import com.capstone.cinepass.dto.RegisterRequest;
-import com.capstone.cinepass.dto.UserResponse;
 import com.capstone.cinepass.entity.User;
 import com.capstone.cinepass.repository.UserRepository;
 import com.capstone.cinepass.security.JwtUtil;
@@ -32,8 +31,7 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getEmail());
-        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(), user.getName(), user.isAdmin());
-        return new AuthResponse(token, userResponse);
+        return new AuthResponse(token, user.getEmail(), user.getName(), user.isAdmin());
     }
 
     @Override
@@ -45,8 +43,7 @@ public class AuthServiceImpl implements AuthService {
         }
 
         String token = jwtUtil.generateToken(user.getEmail());
-        UserResponse userResponse = new UserResponse(user.getId(), user.getEmail(), user.getName(), user.isAdmin());
 
-        return new AuthResponse(token, userResponse);
+        return new AuthResponse(token, user.getEmail(), user.getName(), user.isAdmin());
     }
 }

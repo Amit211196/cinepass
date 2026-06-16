@@ -1,8 +1,8 @@
 spring:
   datasource: # H2 database for dev environment
-    url: jdbc:h2:file:./data/cinepass
-    username: sa
-    password: password
+    url: ${SPRING_DATASOURCE_URL:jdbc:h2:file:./data/cinepass}
+    username: ${SPRING_DATASOURCE_USERNAME:sa}
+    password: ${SPRING_DATASOURCE_PASSWORD:password}
     driverClassName: org.h2.Driver
   jpa:
     database-platform: org.hibernate.dialect.H2Dialect
@@ -11,3 +11,7 @@ spring:
   h2:
     console:
       enabled: true
+
+jwt:
+  secret: ${JWT_SECRET:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
+  expiration-ms: 2700000
