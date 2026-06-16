@@ -13,7 +13,7 @@ export const Home: React.FC = () => {
   const navigate = useNavigate();
   const { showToast } = useToast();
 
-  const genres = ['All', 'Sci-Fi', 'Animation', 'Action']; // In-scope genres + All
+  const genres = ['All', 'Sci-Fi', 'Animation', 'Action', 'Drama', 'Comedy', 'Thriller', 'Horror', 'Romance']; // In-scope genres + All
 
   useEffect(() => {
     const fetchMovies = async () => {
@@ -126,7 +126,12 @@ export const Home: React.FC = () => {
         <div className="no-bookings-placeholder" style={{ padding: '80px 20px' }}>
           <Film size={40} style={{ marginBottom: '16px', color: 'var(--color-primary)' }} />
           <h3>No Movies Found</h3>
-          <p>We couldn't find any movies matching "{searchQuery}" in genre "{selectedGenre}".</p>
+          <p>
+            {searchQuery 
+              ? `We couldn't find any movies matching "${searchQuery}" in genre "${selectedGenre}".`
+              : `We couldn't find any movies in genre "${selectedGenre}".`
+            }
+          </p>
         </div>
       )}
     </div>

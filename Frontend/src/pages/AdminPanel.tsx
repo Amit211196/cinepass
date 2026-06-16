@@ -34,7 +34,7 @@ export const AdminPanel: React.FC = () => {
   const [stTime, setStTime] = useState<string>('');
   const [stPrice, setStPrice] = useState<number>(200);
 
-  const genres = ['Sci-Fi', 'Animation', 'Action', 'Drama', 'Comedy', 'Thriller'];
+  const genres = ['Sci-Fi', 'Animation', 'Action', 'Drama', 'Comedy', 'Thriller', 'Horror', 'Romance'];
   const ratings = ['U', 'U/A', 'A'];
 
   const loadData = async () => {
