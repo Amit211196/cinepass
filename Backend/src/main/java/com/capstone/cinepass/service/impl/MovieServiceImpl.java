@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -41,14 +42,14 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public MovieDetailResponse getMovieDetails(Long id) {
+    public MovieDetailResponse getMovieDetails(UUID id) {
         Movie movie = movieRepository.findById(id).orElseThrow();
 
         return getMovieDetailResponseFromMovie(movie);
     }
 
     @Override
-    public MovieDetailResponse updateMovie(Long id, UpdateMovieRequest request) {
+    public MovieDetailResponse updateMovie(UUID id, UpdateMovieRequest request) {
         Movie movie = movieRepository.findById(id).orElseThrow();
 
         movie.setTitle(request.title());
@@ -60,7 +61,7 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public void deleteMovie(Long id) {
+    public void deleteMovie(UUID id) {
         Movie movie = movieRepository.findById(id).orElseThrow();
 
         movie.setActive(false);

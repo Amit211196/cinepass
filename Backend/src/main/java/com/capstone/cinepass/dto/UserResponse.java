@@ -1,4 +1,6 @@
 package com.capstone.cinepass.dto;
 
-public record UserResponse(Long id, String email, String name, boolean isAdmin) {
+import java.util.UUID;
+
+public record UserResponse(UUID id, String email, String name, boolean isAdmin) {
 }

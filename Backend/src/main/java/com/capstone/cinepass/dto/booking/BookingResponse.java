@@ -8,12 +8,13 @@ import java.time.LocalDate;
 import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Schema(description = "Booking details returned to clients")
 public record BookingResponse(
-        Long id,
-        Long userId,
-        Long showtimeId,
+        UUID id,
+        UUID userId,
+        UUID showtimeId,
         BookingStatus status,
         BigDecimal totalPrice,
         List<String> seatCodes,

@@ -7,14 +7,13 @@ import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
-import jakarta.persistence.SequenceGenerator;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Table;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
 @Entity
 @Table(name = "movies")
@@ -24,9 +23,8 @@ import java.time.LocalDate;
 public class Movie {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "movie_seq")
-    @SequenceGenerator(name = "movie_seq", sequenceName = "movie_seq", allocationSize = 1)
-    private Long id;
+    @GeneratedValue
+    private UUID id;
 
     @Column(nullable = false)
     private String title;

@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     @Override
     public ShowTimeResponse createShowtime(CreateShowtimeRequest request) {
         Showtime showtime = new Showtime(
+                UUID.randomUUID(),
                 request.movieId(),
                 request.theatreName(),
                 request.showDate(),
@@ -34,7 +36,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
 
     @Override
     @Transactional(readOnly = true)
-    public List<ShowTimeResponse> getShowtimesByMovie(Long movieId) {
+    public List<ShowTimeResponse> getShowtimesByMovie(UUID movieId) {
         return showtimeRepository.findByMovieIdOrderByShowDateAscShowTimeAsc(movieId)
                 .stream()
                 .map(this::toResponse)
@@ -42,7 +44,7 @@ public class ShowtimeServiceImpl implements ShowtimeService {
     }
 
     @Override
-    public void deleteShowtime(Long showtimeId) {
+    public void deleteShowtime(UUID showtimeId) {
         Showtime showtime = showtimeRepository.findById(showtimeId)
                 .orElseThrow(() -> new RuntimeException("Showtime not found"));
         showtimeRepository.delete(showtime);

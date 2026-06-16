@@ -3,12 +3,13 @@ package com.capstone.cinepass.service;
 import com.capstone.cinepass.dto.ShowTimeResponse;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface ShowtimeService {
 
     ShowTimeResponse createShowtime(com.capstone.cinepass.dto.CreateShowtimeRequest request);
 
-    List<ShowTimeResponse> getShowtimesByMovie(Long movieId);
+    List<ShowTimeResponse> getShowtimesByMovie(UUID movieId);
 
-    void deleteShowtime(Long showtimeId);
+    void deleteShowtime(UUID showtimeId);
 }

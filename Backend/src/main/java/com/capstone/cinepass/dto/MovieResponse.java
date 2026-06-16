@@ -3,6 +3,7 @@ package com.capstone.cinepass.dto;
 import com.capstone.cinepass.constant.Genre;
 
 import java.time.LocalDate;
+import java.util.UUID;
 
-public record MovieResponse(Long id, String title, Genre genre, LocalDate releaseDate, String posterUrl) {
+public record MovieResponse(UUID id, String title, Genre genre, LocalDate releaseDate, String posterUrl) {
 }

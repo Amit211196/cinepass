@@ -5,16 +5,17 @@ import com.capstone.cinepass.dto.booking.CancelBookingResponse;
 import com.capstone.cinepass.dto.booking.CreateBookingRequest;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface BookingService {
 
     BookingResponse createBooking(CreateBookingRequest request);
 
-    List<String> getBookedSeats(Long showtimeId);
+    List<String> getBookedSeats(UUID showtimeId);
 
     List<BookingResponse> getMyBookings();
 
-    CancelBookingResponse cancelBooking(Long bookingId);
+    CancelBookingResponse cancelBooking(UUID bookingId);
 
     List<BookingResponse> getAllBookings();
 }

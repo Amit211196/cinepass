@@ -9,9 +9,10 @@ import org.springframework.stereotype.Repository;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
-public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> {
+public interface BookingSeatRepository extends JpaRepository<BookingSeat, UUID> {
 
     @Query("""
             select bs.seatCode
@@ -21,7 +22,7 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
             order by bs.seatCode
             """)
     List<String> findSeatCodesByShowtimeIdAndBookingStatus(
-            @Param("showtimeId") Long showtimeId,
+            @Param("showtimeId") UUID showtimeId,
             @Param("status") BookingStatus status
     );
 
@@ -33,7 +34,7 @@ public interface BookingSeatRepository extends JpaRepository<BookingSeat, Long> 
               and bs.seatCode in :seatCodes
             """)
     List<String> findConflictingSeatCodes(
-            @Param("showtimeId") Long showtimeId,
+            @Param("showtimeId") UUID showtimeId,
             @Param("status") BookingStatus status,
             @Param("seatCodes") Collection<String> seatCodes
     );
