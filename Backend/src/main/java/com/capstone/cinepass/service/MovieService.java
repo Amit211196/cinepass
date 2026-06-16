@@ -7,6 +7,7 @@ import com.capstone.cinepass.dto.MovieResponse;
 import com.capstone.cinepass.dto.UpdateMovieRequest;
 
 import java.util.List;
+import java.util.UUID;
 
 public interface MovieService {
 
@@ -14,9 +15,9 @@ public interface MovieService {
 
     List<MovieResponse> getMovies(Genre genre);
 
-    MovieDetailResponse getMovieDetails(Long id);
+    MovieDetailResponse getMovieDetails(UUID id);
 
-    MovieDetailResponse updateMovie(Long id, UpdateMovieRequest request);
+    MovieDetailResponse updateMovie(UUID id, UpdateMovieRequest request);
 
-    void deleteMovie(Long id);
+    void deleteMovie(UUID id);
 }

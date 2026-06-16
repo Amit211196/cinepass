@@ -31,5 +31,4 @@ build/
 
 ### VS Code ###
 .vscode/
-### Database ###
-data/
+/data/cinepass.mv.db
