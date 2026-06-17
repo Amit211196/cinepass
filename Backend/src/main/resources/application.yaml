@@ -2,16 +2,8 @@ spring:
   application:
     name: cinepass
   profiles:
-    active: dev # default profile
+    active: ${ACTIVE_PROFILE:dev} # default profile
 
-  datasource:
-    url: jdbc:postgresql://localhost:5432/cinepass
-    username: postgres
-    password: postgres
-  jpa:
-    hibernate:
-      ddl-auto: update
-
-jwt:
-  secret: ${JWT_SECRET:MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=}
-  expiration-ms: 2700000
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
