@@ -21,6 +21,7 @@ public record BookingResponse(
         OffsetDateTime bookedAt,
         OffsetDateTime cancelledAt,
         String movieTitle,
+        String moviePoster,
         String theatreName,
         LocalDate showDate,
         LocalTime showTime,

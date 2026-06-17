@@ -2,6 +2,7 @@ package com.capstone.cinepass.controller;
 
 import com.capstone.cinepass.dto.CreateShowtimeRequest;
 import com.capstone.cinepass.dto.ShowTimeResponse;
+import com.capstone.cinepass.dto.UpdateShowtimeRequest;
 import com.capstone.cinepass.service.ShowtimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -43,6 +45,16 @@ public class ShowtimeController {
     @Operation(summary = "Get showtimes for a movie")
     public ResponseEntity<List<ShowTimeResponse>> getShowtimesByMovie(@PathVariable UUID movieId) {
         return ResponseEntity.ok(showtimeService.getShowtimesByMovie(movieId));
+    }
+
+    @PutMapping("/{showtimeId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    @Operation(summary = "Update a showtime (Admin only)")
+    @SecurityRequirement(name = "bearerAuth")
+    public ResponseEntity<ShowTimeResponse> updateShowtime(
+            @PathVariable UUID showtimeId,
+            @Valid @RequestBody UpdateShowtimeRequest request) {
+        return ResponseEntity.ok(showtimeService.updateShowtime(showtimeId, request));
     }
 
     @DeleteMapping("/{showtimeId}")

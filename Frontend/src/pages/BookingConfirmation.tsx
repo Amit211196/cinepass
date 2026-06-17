@@ -199,7 +199,7 @@ export const BookingConfirmation: React.FC = () => {
             <div className="receipt-row">
               <span className="receipt-label">Payment Status</span>
               <span className="receipt-value" style={{ color: 'var(--color-success)', fontWeight: 'bold' }}>
-                PAID (MOCK)
+                PAID
               </span>
             </div>
             <div className="receipt-row total">

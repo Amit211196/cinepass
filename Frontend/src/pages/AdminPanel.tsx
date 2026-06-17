@@ -17,11 +17,12 @@ export const AdminPanel: React.FC = () => {
   const [editingMovie, setEditingMovie] = useState<Movie | null>(null);
   
   const [showtimeModalOpen, setShowtimeModalOpen] = useState<boolean>(false);
+  const [editingShowtime, setEditingShowtime] = useState<Showtime | null>(null);
 
   // Movie Form Fields
   const [movieTitle, setMovieTitle] = useState<string>('');
   const [movieGenre, setMovieGenre] = useState<string>('Sci-Fi');
-  const [movieDuration, setMovieDuration] = useState<number>(120);
+  const [movieDuration, setMovieDuration] = useState<number | ''>(120);
   const [movieRating, setMovieRating] = useState<string>('U/A');
   const [moviePoster, setMoviePoster] = useState<string>('');
   const [movieSynopsis, setMovieSynopsis] = useState<string>('');
@@ -32,7 +33,7 @@ export const AdminPanel: React.FC = () => {
   const [stTheatre, setStTheatre] = useState<string>('');
   const [stDate, setStDate] = useState<string>('');
   const [stTime, setStTime] = useState<string>('');
-  const [stPrice, setStPrice] = useState<number>(200);
+  const [stPrice, setStPrice] = useState<number | ''>(200);
 
   const genres = ['Sci-Fi', 'Animation', 'Action', 'Drama', 'Comedy', 'Thriller', 'Horror', 'Romance'];
   const ratings = ['U', 'U/A', 'A'];
@@ -102,7 +103,7 @@ export const AdminPanel: React.FC = () => {
     const movieData = {
       title: movieTitle,
       genre: movieGenre,
-      durationMins: movieDuration,
+      durationMins: Number(movieDuration) || 120,
       rating: movieRating,
       posterUrl: moviePoster,
       synopsis: movieSynopsis,
@@ -144,6 +145,7 @@ export const AdminPanel: React.FC = () => {
       showToast('Please add a movie first', 'info');
       return;
     }
+    setEditingShowtime(null);
     setStMovieId(movies[0].id);
     setStTheatre('');
     // Default show date to tomorrow
@@ -155,10 +157,21 @@ export const AdminPanel: React.FC = () => {
     setShowtimeModalOpen(true);
   };
 
+  // Open Edit Showtime Modal
+  const openEditShowtimeModal = (st: Showtime) => {
+    setEditingShowtime(st);
+    setStMovieId(st.movieId);
+    setStTheatre(st.theatreName);
+    setStDate(st.showDate);
+    setStTime(st.showTime);
+    setStPrice(st.ticketPrice);
+    setShowtimeModalOpen(true);
+  };
+
   // Save Showtime
   const handleSaveShowtime = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!stMovieId || !stTheatre || !stDate || !stTime || stPrice <= 0) {
+    if (!stMovieId || !stTheatre || !stDate || !stTime || Number(stPrice) <= 0) {
       showToast('Please fill in all showtime fields correctly', 'error');
       return;
     }
@@ -172,12 +185,17 @@ export const AdminPanel: React.FC = () => {
     };
 
     try {
-      await api.showtimes.create(showtimeData);
-      showToast('Showtime created successfully', 'success');
+      if (editingShowtime) {
+        await api.showtimes.update(editingShowtime.id, showtimeData);
+        showToast('Showtime updated successfully', 'success');
+      } else {
+        await api.showtimes.create(showtimeData);
+        showToast('Showtime created successfully', 'success');
+      }
       setShowtimeModalOpen(false);
       loadData();
     } catch (err: any) {
-      showToast(err.message || 'Failed to create showtime', 'error');
+      showToast(err.message || 'Failed to save showtime', 'error');
     }
   };
 
@@ -330,7 +348,7 @@ export const AdminPanel: React.FC = () => {
         ) : activeTab === 'showtimes' ? (
           <div>
             <div className="admin-section-header">
-              <h3>Seeded Showtimes ({showtimes.length} slots)</h3>
+              <h3>Scheduled Showtimes ({showtimes.length} slots)</h3>
               <button className="btn btn-primary btn-sm" onClick={openAddShowtimeModal}>
                 <Plus size={16} />
                 Add New Showtime
@@ -358,13 +376,22 @@ export const AdminPanel: React.FC = () => {
                       <td>{st.showTime}</td>
                       <td style={{ color: 'var(--color-primary)', fontWeight: 'bold' }}>₹{st.ticketPrice}</td>
                       <td>
-                        <button 
-                          className="btn btn-danger btn-sm"
-                          onClick={() => handleDeleteShowtime(st.id)}
-                          title="Delete showtime"
-                        >
-                          <Trash2 size={14} />
-                        </button>
+                        <div className="admin-action-btns">
+                          <button 
+                            className="btn btn-secondary btn-sm"
+                            onClick={() => openEditShowtimeModal(st)}
+                            title="Edit showtime"
+                          >
+                            <Edit size={14} />
+                          </button>
+                          <button 
+                            className="btn btn-danger btn-sm"
+                            onClick={() => handleDeleteShowtime(st.id)}
+                            title="Delete showtime"
+                          >
+                            <Trash2 size={14} />
+                          </button>
+                        </div>
                       </td>
                     </tr>
                   ))}
@@ -475,6 +502,7 @@ export const AdminPanel: React.FC = () => {
                       value={movieTitle} 
                       onChange={(e) => setMovieTitle(e.target.value)} 
                       placeholder="e.g. Interstellar"
+                      autoComplete="off"
                       required
                     />
                   </div>
@@ -507,8 +535,12 @@ export const AdminPanel: React.FC = () => {
                       type="number" 
                       className="admin-input" 
                       value={movieDuration} 
-                      onChange={(e) => setMovieDuration(Number(e.target.value))} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setMovieDuration(val === '' ? '' : Number(val));
+                      }} 
                       min={1}
+                      autoComplete="off"
                       required
                     />
                   </div>
@@ -521,6 +553,7 @@ export const AdminPanel: React.FC = () => {
                       value={moviePoster} 
                       onChange={(e) => setMoviePoster(e.target.value)} 
                       placeholder="https://unsplash.com/..."
+                      autoComplete="off"
                       required
                     />
                   </div>
@@ -533,6 +566,7 @@ export const AdminPanel: React.FC = () => {
                       value={movieCast} 
                       onChange={(e) => setMovieCast(e.target.value)} 
                       placeholder="Leonardo DiCaprio, Tom Hardy, Elliot Page"
+                      autoComplete="off"
                       required
                     />
                   </div>
@@ -560,12 +594,12 @@ export const AdminPanel: React.FC = () => {
         </div>
       )}
 
-      {/* --- SHOWTIME ADD MODAL --- */}
+      {/* --- SHOWTIME ADD/EDIT MODAL --- */}
       {showtimeModalOpen && (
         <div className="modal-overlay">
           <div className="modal-card" style={{ maxWidth: '480px' }}>
             <div className="modal-header">
-              <h3 className="modal-title">Create Showtime Slot</h3>
+              <h3 className="modal-title">{editingShowtime ? 'Edit Showtime Slot' : 'Create Showtime Slot'}</h3>
               <X className="btn-close" onClick={() => setShowtimeModalOpen(false)} />
             </div>
             <form onSubmit={handleSaveShowtime}>
@@ -590,6 +624,7 @@ export const AdminPanel: React.FC = () => {
                       value={stTheatre} 
                       onChange={(e) => setStTheatre(e.target.value)} 
                       placeholder="e.g. PVR Cinemas, INOX"
+                      autoComplete="off"
                       required
                     />
                   </div>
@@ -602,6 +637,7 @@ export const AdminPanel: React.FC = () => {
                         className="admin-input" 
                         value={stDate} 
                         onChange={(e) => setStDate(e.target.value)} 
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         required
                       />
                     </div>
@@ -612,6 +648,7 @@ export const AdminPanel: React.FC = () => {
                         className="admin-input" 
                         value={stTime} 
                         onChange={(e) => setStTime(e.target.value)} 
+                        onClick={(e) => e.currentTarget.showPicker?.()}
                         required
                       />
                     </div>
@@ -623,8 +660,12 @@ export const AdminPanel: React.FC = () => {
                       type="number" 
                       className="admin-input" 
                       value={stPrice} 
-                      onChange={(e) => setStPrice(Number(e.target.value))} 
+                      onChange={(e) => {
+                        const val = e.target.value;
+                        setStPrice(val === '' ? '' : Number(val));
+                      }} 
                       min={10}
+                      autoComplete="off"
                       required
                     />
                   </div>
@@ -632,7 +673,7 @@ export const AdminPanel: React.FC = () => {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" onClick={() => setShowtimeModalOpen(false)}>Cancel</button>
-                <button type="submit" className="btn btn-primary">Schedule Showtime</button>
+                <button type="submit" className="btn btn-primary">{editingShowtime ? 'Save Showtime' : 'Schedule Showtime'}</button>
               </div>
             </form>
           </div>

@@ -23,4 +23,6 @@ public interface BookingRepository extends JpaRepository<Booking, UUID> {
 
     @EntityGraph(attributePaths = {"showtime", "user", "seats"})
     List<Booking> findAll();
+
+    List<Booking> findByShowtimeId(UUID showtimeId);
 }

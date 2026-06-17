@@ -23,6 +23,9 @@ public class MovieServiceImpl implements MovieService {
     @Override
     public MovieResponse addMovie(CreateMovieRequest request) {
         Movie movie = new Movie(request.title(), request.description(), request.genre(), request.releaseDate(), true, request.posterUrl());
+        movie.setCastText(request.castText());
+        movie.setDurationMins(request.durationMins());
+        movie.setRating(request.rating());
         Movie savedMovie = movieRepository.save(movie);
 
         return getMovieResponseFromMovie(savedMovie);
@@ -56,6 +59,10 @@ public class MovieServiceImpl implements MovieService {
         movie.setDescription(request.description());
         movie.setGenre(request.genre());
         movie.setReleaseDate(request.releaseDate());
+        movie.setPosterUrl(request.posterUrl());
+        movie.setCastText(request.castText());
+        movie.setDurationMins(request.durationMins());
+        movie.setRating(request.rating());
 
         return getMovieDetailResponseFromMovie(movieRepository.save(movie));
     }
@@ -69,11 +76,31 @@ public class MovieServiceImpl implements MovieService {
     }
 
     private MovieResponse getMovieResponseFromMovie(Movie movie) {
-        return new MovieResponse(movie.getId(), movie.getTitle(), movie.getGenre(), movie.getReleaseDate(), movie.getPosterUrl());
+        return new MovieResponse(
+                movie.getId(),
+                movie.getTitle(),
+                movie.getDescription(),
+                movie.getGenre(),
+                movie.getReleaseDate(),
+                movie.getPosterUrl(),
+                movie.getCastText(),
+                movie.getDurationMins(),
+                movie.getRating()
+        );
     }
 
     private MovieDetailResponse getMovieDetailResponseFromMovie(Movie movie) {
-        return new MovieDetailResponse(movie.getId(), movie.getTitle(), movie.getDescription(),
-                movie.getGenre(), movie.getReleaseDate(), List.of());
+        return new MovieDetailResponse(
+                movie.getId(),
+                movie.getTitle(),
+                movie.getDescription(),
+                movie.getGenre(),
+                movie.getReleaseDate(),
+                movie.getPosterUrl(),
+                movie.getCastText(),
+                movie.getDurationMins(),
+                movie.getRating(),
+                List.of()
+        );
     }
 }

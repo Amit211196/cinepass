@@ -12,8 +12,10 @@ import com.capstone.cinepass.exception.BadRequestException;
 import com.capstone.cinepass.exception.ForbiddenException;
 import com.capstone.cinepass.exception.ResourceNotFoundException;
 import com.capstone.cinepass.exception.UnauthenticatedException;
+import com.capstone.cinepass.entity.Movie;
 import com.capstone.cinepass.repository.BookingRepository;
 import com.capstone.cinepass.repository.BookingSeatRepository;
+import com.capstone.cinepass.repository.MovieRepository;
 import com.capstone.cinepass.repository.ShowtimeRepository;
 import com.capstone.cinepass.repository.UserRepository;
 import com.capstone.cinepass.service.BookingService;
@@ -43,6 +45,7 @@ public class BookingServiceImpl implements BookingService {
     private final BookingSeatRepository bookingSeatRepository;
     private final ShowtimeRepository showtimeRepository;
     private final UserRepository userRepository;
+    private final MovieRepository movieRepository;
 
     @Override
     public BookingResponse createBooking(CreateBookingRequest request) {
@@ -100,7 +103,7 @@ public class BookingServiceImpl implements BookingService {
         Booking booking = bookingRepository.findWithDetailsById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
 
-        if (!booking.getUser().getId().equals(currentUser.getId())) {
+        if (!currentUser.isAdmin() && !booking.getUser().getId().equals(currentUser.getId())) {
             throw new ForbiddenException("You can cancel only your own bookings");
         }
         if (booking.getStatus() == BookingStatus.CANCELLED) {
@@ -164,6 +167,14 @@ public class BookingServiceImpl implements BookingService {
         Showtime showtime = booking.getShowtime();
         User user = booking.getUser();
 
+        String movieTitle = "";
+        String moviePoster = "";
+        Movie movie = movieRepository.findById(showtime.getMovieId()).orElse(null);
+        if (movie != null) {
+            movieTitle = movie.getTitle();
+            moviePoster = movie.getPosterUrl();
+        }
+
         return new BookingResponse(
                 booking.getId(),
                 booking.getUser().getId(),
@@ -173,7 +184,8 @@ public class BookingServiceImpl implements BookingService {
                 seatCodes,
                 booking.getBookedAt(),
                 booking.getCancelledAt(),
-                "", // movieTitle - will be fetched when needed
+                movieTitle,
+                moviePoster,
                 showtime.getTheatreName(),
                 showtime.getShowDate(),
                 showtime.getShowTime(),

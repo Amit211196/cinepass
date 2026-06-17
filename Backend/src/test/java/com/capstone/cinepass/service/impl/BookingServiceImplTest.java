@@ -13,6 +13,7 @@ import com.capstone.cinepass.exception.ResourceNotFoundException;
 import com.capstone.cinepass.exception.UnauthenticatedException;
 import com.capstone.cinepass.repository.BookingRepository;
 import com.capstone.cinepass.repository.BookingSeatRepository;
+import com.capstone.cinepass.repository.MovieRepository;
 import com.capstone.cinepass.repository.ShowtimeRepository;
 import com.capstone.cinepass.repository.UserRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -59,6 +60,9 @@ class BookingServiceImplTest {
     @Mock
     private UserRepository userRepository;
 
+    @Mock
+    private MovieRepository movieRepository;
+
     @InjectMocks
     private BookingServiceImpl bookingService;
 
@@ -68,7 +72,7 @@ class BookingServiceImplTest {
     @BeforeEach
     void setUp() {
         currentUser = new User(USER_EMAIL, "hashed-password", "Test User", false);
-        ReflectionTestUtils.setField(currentUser, "id", 1L);
+        currentUser.setId(UUID.randomUUID());
 
         showtime = Showtime.builder()
                 .id(UUID.randomUUID())
@@ -93,6 +97,7 @@ class BookingServiceImplTest {
 
         when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(currentUser));
         when(showtimeRepository.findById(showtime.getId())).thenReturn(Optional.of(showtime));
+        when(movieRepository.findById(showtime.getMovieId())).thenReturn(Optional.empty());
         when(bookingSeatRepository.findConflictingSeatCodes(
                 showtime.getId(),
                 BookingStatus.CONFIRMED,
@@ -107,7 +112,7 @@ class BookingServiceImplTest {
         BookingResponse response = bookingService.createBooking(request);
 
         assertThat(response.id()).isEqualTo(bookingId);
-        assertThat(response.userId()).isEqualTo(1L);
+        assertThat(response.userId()).isEqualTo(currentUser.getId());
         assertThat(response.showtimeId()).isEqualTo(showtime.getId());
         assertThat(response.status()).isEqualTo(BookingStatus.CONFIRMED);
         assertThat(response.totalPrice()).isEqualByComparingTo("500.00");
@@ -237,6 +242,7 @@ class BookingServiceImplTest {
 
         when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(currentUser));
         when(bookingRepository.findByUser_IdOrderByBookedAtDesc(currentUser.getId())).thenReturn(List.of(newer, older));
+        when(movieRepository.findById(showtime.getMovieId())).thenReturn(Optional.empty());
 
         List<BookingResponse> responses = bookingService.getMyBookings();
 
@@ -280,7 +286,7 @@ class BookingServiceImplTest {
     void cancelBookingRejectsOtherUsersBooking() {
         authenticate(USER_EMAIL);
         User otherUser = new User("other@cinepass.com", "hashed-password", "Other User", false);
-        ReflectionTestUtils.setField(otherUser, "id", 2L);
+        otherUser.setId(UUID.randomUUID());
         Booking booking = bookingWith(otherUser, showtime, BookingStatus.CONFIRMED, OffsetDateTime.now());
 
         when(userRepository.findByEmail(USER_EMAIL)).thenReturn(Optional.of(currentUser));

@@ -24,7 +24,7 @@ public class AuthServiceImpl implements AuthService {
     public AuthResponse register(RegisterRequest registerRequest) {
 
         if (userRepository.existsByEmail(registerRequest.email())) {
-            throw new RuntimeException("User with email already exists");
+            throw new com.capstone.cinepass.exception.BadRequestException("User with email already exists");
         }
 
         User user = new User(registerRequest.email(), passwordEncoder.encode(registerRequest.password()),
@@ -38,10 +38,11 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public AuthResponse login(LoginRequest loginRequest) {
-        User user = userRepository.findByEmail(loginRequest.email()).orElseThrow(() -> new UsernameNotFoundException("User not found"));
+        User user = userRepository.findByEmail(loginRequest.email())
+                .orElseThrow(() -> new com.capstone.cinepass.exception.UnauthenticatedException("Invalid email or password"));
 
         if (!passwordEncoder.matches(loginRequest.password(), user.getPasswordHash())) {
-            throw new RuntimeException("Invalid credentials");
+            throw new com.capstone.cinepass.exception.UnauthenticatedException("Invalid email or password");
         }
 
         String token = jwtUtil.generateToken(user.getEmail());

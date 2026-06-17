@@ -9,6 +9,8 @@ public interface ShowtimeService {
 
     ShowTimeResponse createShowtime(com.capstone.cinepass.dto.CreateShowtimeRequest request);
 
+    ShowTimeResponse updateShowtime(UUID showtimeId, com.capstone.cinepass.dto.UpdateShowtimeRequest request);
+
     List<ShowTimeResponse> getShowtimesByMovie(UUID movieId);
 
     void deleteShowtime(UUID showtimeId);

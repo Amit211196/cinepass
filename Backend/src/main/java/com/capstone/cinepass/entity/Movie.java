@@ -45,12 +45,24 @@ public class Movie {
     @Column(name = "POSTER_URL")
     private String posterUrl;
 
-    public Movie(String title, String description, Genre genre, LocalDate releaseDate, boolean active,String posterUrl) {
+    @Column(name = "CAST_TEXT", length = 1000)
+    private String castText;
+
+    @Column(name = "DURATION_MINS")
+    private Integer durationMins;
+
+    @Column(name = "RATING")
+    private String rating;
+
+    public Movie(String title, String description, Genre genre, LocalDate releaseDate, boolean active, String posterUrl) {
         this.title = title;
         this.description = description;
         this.genre = genre;
         this.releaseDate = releaseDate;
         this.active = active;
         this.posterUrl = posterUrl;
+        this.castText = "Cast details not specified.";
+        this.durationMins = 120;
+        this.rating = "U/A";
     }
 }

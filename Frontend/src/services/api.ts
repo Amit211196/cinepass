@@ -55,8 +55,6 @@ const KEYS = {
   CURRENT_USER: 'cinepass_current_user',
 };
 
-// Helper: Simulated delay
-const delay = (ms: number = 300) => new Promise((resolve) => setTimeout(resolve, ms));
 
 // Helper: Generate UUID
 const uuid = () => Math.random().toString(36).substring(2, 11);
@@ -302,6 +300,20 @@ const getAuthHeaders = (): Record<string, string> => {
   return headers;
 };
 
+const getErrorMessage = async (response: Response, defaultMsg: string): Promise<string> => {
+  try {
+    const text = await response.text();
+    try {
+      const data = JSON.parse(text);
+      return data?.message || defaultMsg;
+    } catch {
+      return text || defaultMsg;
+    }
+  } catch {
+    return defaultMsg;
+  }
+};
+
 const mapGenreToBackend = (genre: string): string => {
   const mapping: { [key: string]: string } = {
     'sci-fi': 'SCI_FI',
@@ -344,6 +356,38 @@ const mapMovieToFrontend = (m: any): Movie => {
   };
 };
 
+
+const mapShowtimeToFrontend = (st: any): Showtime => {
+  return {
+    id: String(st.id),
+    movieId: String(st.movieId),
+    theatreName: st.theatreName,
+    showDate: st.showDate,
+    showTime: st.showTime ? st.showTime.substring(0, 5) : '',
+    ticketPrice: Number(st.ticketPrice),
+    createdAt: new Date().toISOString()
+  };
+};
+
+const mapBookingToFrontend = (b: any): Booking => {
+  return {
+    id: String(b.id),
+    userId: String(b.userId),
+    showtimeId: String(b.showtimeId),
+    createdAt: b.bookedAt || new Date().toISOString(),
+    status: b.status === 'CANCELLED' ? 'CANCELLED' : 'CONFIRMED',
+    totalPrice: Number(b.totalPrice),
+    seatCodes: b.seatCodes || [],
+    movieTitle: b.movieTitle || 'Unknown Movie',
+    moviePoster: b.moviePoster || '',
+    theatreName: b.theatreName || 'Unknown Theatre',
+    showDate: b.showDate || '',
+    showTime: b.showTime ? b.showTime.substring(0, 5) : '',
+    customerName: b.customerName || 'Guest User',
+    customerEmail: b.customerEmail || 'N/A'
+  };
+};
+
 // API Service Implementation
 export const api = {
   // --- AUTH ENDPOINTS ---
@@ -355,15 +399,14 @@ export const api = {
         body: JSON.stringify({ name, email, password: passwordHash })
       });
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to register');
+        throw new Error(await getErrorMessage(response, 'Failed to register'));
       }
       const data = await response.json();
       return {
-        id: data.email,
-        email: data.email,
-        name: data.name,
-        isAdmin: data.isAdmin,
+        id: String(data.user.id),
+        email: data.user.email,
+        name: data.user.name,
+        isAdmin: data.user.isAdmin,
         createdAt: new Date().toISOString()
       };
     },
@@ -375,15 +418,14 @@ export const api = {
         body: JSON.stringify({ email, password: passwordHash })
       });
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to login');
+        throw new Error(await getErrorMessage(response, 'Failed to login'));
       }
       const data = await response.json();
       const user: User = {
-        id: data.email,
-        email: data.email,
-        name: data.name,
-        isAdmin: data.isAdmin,
+        id: String(data.user.id),
+        email: data.user.email,
+        name: data.user.name,
+        isAdmin: data.user.isAdmin,
         createdAt: new Date().toISOString()
       };
       const result = { token: data.token, user };
@@ -445,8 +487,7 @@ export const api = {
         })
       });
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to create movie');
+        throw new Error(await getErrorMessage(response, 'Failed to create movie'));
       }
       const created = await response.json();
       return mapMovieToFrontend(created);
@@ -471,8 +512,7 @@ export const api = {
         })
       });
       if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Failed to update movie');
+        throw new Error(await getErrorMessage(response, 'Failed to update movie'));
       }
       const updated = await response.json();
       return mapMovieToFrontend(updated);
@@ -492,157 +532,124 @@ export const api = {
   // --- SHOWTIMES ENDPOINTS ---
   showtimes: {
     getByMovieId: async (movieId: string): Promise<Showtime[]> => {
-      await delay(250);
-      const showtimes = getStorage<Showtime[]>(KEYS.SHOWTIMES, []);
-      return showtimes.filter(s => s.movieId === movieId);
+      const response = await fetch(`${BASE_URL}/showtimes/movie/${movieId}`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch showtimes');
+      }
+      const list = await response.json();
+      return list.map(mapShowtimeToFrontend);
     },
 
     getBookedSeats: async (showtimeId: string): Promise<string[]> => {
-      await delay(200);
-      const bookings = getStorage<Booking[]>(KEYS.BOOKINGS, []);
-      // Active confirmed bookings only
-      const activeBookings = bookings.filter(b => b.showtimeId === showtimeId && b.status === 'CONFIRMED');
-      const bookedSeats: string[] = [];
-      activeBookings.forEach(b => {
-        bookedSeats.push(...b.seatCodes);
+      const response = await fetch(`${BASE_URL}/showtimes/${showtimeId}/seats`, {
+        headers: getAuthHeaders()
       });
-      return bookedSeats;
+      if (!response.ok) {
+        throw new Error('Failed to fetch booked seats');
+      }
+      return await response.json();
     },
 
     create: async (showtimeData: Omit<Showtime, 'id' | 'createdAt'>): Promise<Showtime> => {
-      await delay(400);
-      const showtimes = getStorage<Showtime[]>(KEYS.SHOWTIMES, []);
-      const newShowtime: Showtime = {
-        ...showtimeData,
-        id: `st-${uuid()}`,
-        createdAt: new Date().toISOString(),
-      };
-      showtimes.push(newShowtime);
-      setStorage(KEYS.SHOWTIMES, showtimes);
-      return newShowtime;
+      const response = await fetch(`${BASE_URL}/showtimes`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          movieId: showtimeData.movieId,
+          theatreName: showtimeData.theatreName,
+          showDate: showtimeData.showDate,
+          showTime: showtimeData.showTime.split(':').length === 2 ? `${showtimeData.showTime}:00` : showtimeData.showTime, // Format to HH:MM:SS
+          ticketPrice: showtimeData.ticketPrice
+        })
+      });
+      if (!response.ok) {
+        throw new Error(await getErrorMessage(response, 'Failed to create showtime'));
+      }
+      const created = await response.json();
+      return mapShowtimeToFrontend(created);
     },
 
     delete: async (id: string): Promise<void> => {
-      await delay(300);
-      let showtimes = getStorage<Showtime[]>(KEYS.SHOWTIMES, []);
-      showtimes = showtimes.filter(s => s.id !== id);
-      setStorage(KEYS.SHOWTIMES, showtimes);
+      const response = await fetch(`${BASE_URL}/showtimes/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete showtime');
+      }
+    },
 
-      // Cascade delete bookings for this showtime
-      let bookings = getStorage<Booking[]>(KEYS.BOOKINGS, []);
-      bookings = bookings.filter(b => b.showtimeId !== id);
-      setStorage(KEYS.BOOKINGS, bookings);
+    update: async (id: string, showtimeData: Omit<Showtime, 'id' | 'createdAt'>): Promise<Showtime> => {
+      const response = await fetch(`${BASE_URL}/showtimes/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          movieId: showtimeData.movieId,
+          theatreName: showtimeData.theatreName,
+          showDate: showtimeData.showDate,
+          showTime: showtimeData.showTime.split(':').length === 2 ? `${showtimeData.showTime}:00` : showtimeData.showTime, // Format to HH:MM:SS
+          ticketPrice: showtimeData.ticketPrice
+        })
+      });
+      if (!response.ok) {
+        throw new Error(await getErrorMessage(response, 'Failed to update showtime'));
+      }
+      const updated = await response.json();
+      return mapShowtimeToFrontend(updated);
     }
   },
 
   // --- BOOKINGS ENDPOINTS ---
   bookings: {
-    create: async (userId: string, showtimeId: string, seatCodes: string[]): Promise<Booking> => {
-      await delay(500);
-      
-      // Verify seat availability first
-      const bookings = getStorage<Booking[]>(KEYS.BOOKINGS, []);
-      const activeBookingsForShowtime = bookings.filter(
-        b => b.showtimeId === showtimeId && b.status === 'CONFIRMED'
-      );
-      
-      const alreadyBooked: string[] = [];
-      activeBookingsForShowtime.forEach(b => {
-        seatCodes.forEach(sc => {
-          if (b.seatCodes.includes(sc)) {
-            alreadyBooked.push(sc);
-          }
-        });
+    create: async (_userId: string, showtimeId: string, seatCodes: string[]): Promise<Booking> => {
+      const response = await fetch(`${BASE_URL}/bookings`, {
+        method: 'POST',
+        headers: getAuthHeaders(),
+        body: JSON.stringify({
+          showtimeId: showtimeId,
+          seatCodes: seatCodes
+        })
       });
-
-      if (alreadyBooked.length > 0) {
-        throw new Error(`Seats ${alreadyBooked.join(', ')} are already booked!`);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || 'Failed to create booking');
       }
-
-      // Fetch showtime to calculate price
-      const showtimes = getStorage<Showtime[]>(KEYS.SHOWTIMES, []);
-      const showtime = showtimes.find(s => s.id === showtimeId);
-      if (!showtime) {
-        throw new Error('Showtime not found');
-      }
-
-      const newBooking: Booking = {
-        id: `CP-${Math.floor(100000 + Math.random() * 900000)}`, // Standard Booking ID format
-        userId,
-        showtimeId,
-        createdAt: new Date().toISOString(),
-        status: 'CONFIRMED',
-        totalPrice: showtime.ticketPrice * seatCodes.length,
-        seatCodes,
-      };
-
-      bookings.push(newBooking);
-      setStorage(KEYS.BOOKINGS, bookings);
-      return newBooking;
+      const created = await response.json();
+      return mapBookingToFrontend(created);
     },
 
-    getByUser: async (userId: string): Promise<Booking[]> => {
-      await delay(300);
-      const bookings = getStorage<Booking[]>(KEYS.BOOKINGS, []);
-      const userBookings = bookings.filter(b => b.userId === userId);
-      
-      // Enrich booking data
-      const movies = getStorage<Movie[]>(KEYS.MOVIES, []);
-      const showtimes = getStorage<Showtime[]>(KEYS.SHOWTIMES, []);
-
-      return userBookings.map(b => {
-        const showtime = showtimes.find(s => s.id === b.showtimeId);
-        const movie = showtime ? movies.find(m => m.id === showtime.movieId) : null;
-        
-        return {
-          ...b,
-          movieTitle: movie?.title || 'Unknown Movie',
-          moviePoster: movie?.posterUrl || '',
-          theatreName: showtime?.theatreName || 'Unknown Theatre',
-          showDate: showtime?.showDate || '',
-          showTime: showtime?.showTime || '',
-        };
-      }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    getByUser: async (_userId: string): Promise<Booking[]> => {
+      const response = await fetch(`${BASE_URL}/bookings/mine`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch user bookings');
+      }
+      const list = await response.json();
+      return list.map(mapBookingToFrontend);
     },
 
     getAll: async (): Promise<Booking[]> => {
-      await delay(300);
-      const bookings = getStorage<Booking[]>(KEYS.BOOKINGS, []);
-      const movies = getStorage<Movie[]>(KEYS.MOVIES, []);
-      const showtimes = getStorage<Showtime[]>(KEYS.SHOWTIMES, []);
-      const users = getStorage<any[]>(KEYS.USERS, []);
-
-      return bookings.map(b => {
-        const showtime = showtimes.find(s => s.id === b.showtimeId);
-        const movie = showtime ? movies.find(m => m.id === showtime.movieId) : null;
-        const userObj = users.find(u => u.id === b.userId);
-        
-        return {
-          ...b,
-          movieTitle: movie?.title || 'Unknown Movie',
-          moviePoster: movie?.posterUrl || '',
-          theatreName: showtime?.theatreName || 'Unknown Theatre',
-          showDate: showtime?.showDate || '',
-          showTime: showtime?.showTime || '',
-          customerName: userObj?.name || 'Guest User',
-          customerEmail: userObj?.email || 'N/A',
-        };
-      }).sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+      const response = await fetch(`${BASE_URL}/bookings`, {
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch all bookings');
+      }
+      const list = await response.json();
+      return list.map(mapBookingToFrontend);
     },
 
     cancel: async (bookingId: string): Promise<void> => {
-      await delay(300);
-      const bookings = getStorage<Booking[]>(KEYS.BOOKINGS, []);
-      const booking = bookings.find(b => b.id === bookingId);
-      if (!booking) {
-        throw new Error('Booking not found');
+      const response = await fetch(`${BASE_URL}/bookings/${bookingId}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders()
+      });
+      if (!response.ok) {
+        throw new Error('Failed to cancel booking');
       }
-      booking.status = 'CANCELLED';
-      // Alternatively delete or just mark status to free seats
-      // Let's filter it out or change status.
-      // If we mark as 'CANCELLED', does it free the seats?
-      // Yes, in getBookedSeats we check for status === 'CONFIRMED' only!
-      setStorage(KEYS.BOOKINGS, bookings);
     }
   }
 };

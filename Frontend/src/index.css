@@ -1497,6 +1497,17 @@ button, input, select, textarea {
   border-color: var(--border-focus);
 }
 
+.admin-input::-webkit-calendar-picker-indicator {
+  filter: invert(1);
+  cursor: pointer;
+  opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.admin-input::-webkit-calendar-picker-indicator:hover {
+  opacity: 1;
+}
+
 .admin-select option {
   background: var(--bg-secondary);
   color: #fff;
