@@ -61,7 +61,7 @@ call aws rds create-db-instance ^
     --storage-type gp2 ^
     --region !REGION! ^
     --no-multi-az ^
-    --backup-retention-period 7
+    --backup-retention-period 1
 
 if errorlevel 1 (
     echo ERROR: Failed to create database instance

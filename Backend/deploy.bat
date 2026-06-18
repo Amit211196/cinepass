@@ -58,7 +58,10 @@ if not exist ".elasticbeanstalk" (
     set /p REGION="Enter region (default: us-east-1): "
     if "!REGION!"=="" set REGION=us-east-1
 
-    call eb init -p "Java 21" !APP_NAME! --region !REGION!
+    set /p PLATFORM="Enter EB platform (default: corretto-21): "
+    if "!PLATFORM!"=="" set PLATFORM=corretto-21
+
+    call eb init -p "!PLATFORM!" !APP_NAME! --region !REGION!
 
     echo Elastic Beanstalk initialized
 ) else (
