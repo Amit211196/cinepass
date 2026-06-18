@@ -2,7 +2,6 @@ package com.capstone.cinepass.config;
 
 import com.capstone.cinepass.constant.Genre;
 import com.capstone.cinepass.entity.Booking;
-import com.capstone.cinepass.entity.BookingSeat;
 import com.capstone.cinepass.entity.Movie;
 import com.capstone.cinepass.entity.Showtime;
 import com.capstone.cinepass.entity.User;
@@ -12,9 +11,9 @@ import com.capstone.cinepass.repository.BookingSeatRepository;
 import com.capstone.cinepass.repository.MovieRepository;
 import com.capstone.cinepass.repository.ShowtimeRepository;
 import com.capstone.cinepass.repository.UserRepository;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.CommandLineRunner;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,13 +24,13 @@ import java.time.LocalTime;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 @Configuration
 @Slf4j
 public class DataLoaderConfig {
 
     @Bean
+    @ConditionalOnProperty(name = "app.seed-data.enabled", havingValue = "true", matchIfMissing = true)
     CommandLineRunner loadData(
             UserRepository userRepository,
             MovieRepository movieRepository,
