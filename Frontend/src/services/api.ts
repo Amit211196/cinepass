@@ -288,9 +288,10 @@ seedInitialData();
 
 // API Service Implementation
 const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
-const BASE_URL = configuredApiBaseUrl && configuredApiBaseUrl.length > 0
-  ? configuredApiBaseUrl.replace(/\/$/, '')
+const normalizedApiBaseUrl = configuredApiBaseUrl && configuredApiBaseUrl.length > 0
+  ? (/^https?:\/\//i.test(configuredApiBaseUrl) ? configuredApiBaseUrl : `https://${configuredApiBaseUrl}`)
   : 'http://localhost:8080/api';
+const BASE_URL = normalizedApiBaseUrl.replace(/\/$/, '');
 
 const getAuthHeaders = (): Record<string, string> => {
   const currentUser = getStorage<{ token: string } | null>(KEYS.CURRENT_USER, null);
