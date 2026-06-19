@@ -289,7 +289,9 @@ seedInitialData();
 // API Service Implementation
 const configuredApiBaseUrl = (import.meta.env.VITE_API_BASE_URL as string | undefined)?.trim();
 const normalizedApiBaseUrl = configuredApiBaseUrl && configuredApiBaseUrl.length > 0
-  ? (/^https?:\/\//i.test(configuredApiBaseUrl) ? configuredApiBaseUrl : `https://${configuredApiBaseUrl}`)
+  ? (configuredApiBaseUrl.startsWith('/')
+    ? configuredApiBaseUrl
+    : (/^https?:\/\//i.test(configuredApiBaseUrl) ? configuredApiBaseUrl : `https://${configuredApiBaseUrl}`))
   : 'http://localhost:8080/api';
 const BASE_URL = normalizedApiBaseUrl.replace(/\/$/, '');
 

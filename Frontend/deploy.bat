@@ -32,9 +32,11 @@ echo.
 
 set /p BACKEND_API_URL="Enter backend API URL (e.g., http://your-eb-url/api) or leave blank for localhost: "
 if not "!BACKEND_API_URL!"=="" (
-    echo !BACKEND_API_URL! | findstr /R /I "^http:// ^https://" >nul
-    if errorlevel 1 (
-        set BACKEND_API_URL=https://!BACKEND_API_URL!
+    if not "!BACKEND_API_URL:~0,1!"=="/" (
+        echo !BACKEND_API_URL! | findstr /R /I "^http:// ^https://" >nul
+        if errorlevel 1 (
+            set BACKEND_API_URL=https://!BACKEND_API_URL!
+        )
     )
     if "!BACKEND_API_URL:~-1!"=="/" set BACKEND_API_URL=!BACKEND_API_URL:~0,-1!
     set VITE_API_BASE_URL=!BACKEND_API_URL!
