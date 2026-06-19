@@ -48,10 +48,15 @@ build_application() {
 
     ./mvnw clean package -DskipTests
 
-    if [ ! -f "target/*.jar" ]; then
-        echo -e "${RED}Build failed. JAR file not found in target directory.${NC}"
+    mapfile -t JAR_FILES < <(find target -maxdepth 1 -type f -name "*.jar" ! -name "*.original" | sort)
+    if [ ${#JAR_FILES[@]} -eq 0 ]; then
+        echo -e "${RED}Build failed. Runnable JAR not found in target directory.${NC}"
         exit 1
     fi
+
+    # Elastic Beanstalk Java SE expects either Procfile or a root-level JAR.
+    cp "${JAR_FILES[0]}" application.jar
+    echo -e "Prepared application.jar from ${JAR_FILES[0]}"
 
     echo -e "${GREEN}Build successful${NC}"
     echo ""
@@ -98,8 +103,11 @@ deploy_to_elastic_beanstalk() {
         read -sp "Enter RDS password: " RDS_PASSWORD
         echo ""
 
+        read -p "Enter EC2 instance type (default: t3.micro): " INSTANCE_TYPE
+        INSTANCE_TYPE=${INSTANCE_TYPE:-t3.micro}
+
         eb create "$ENV_NAME" \
-            --instance-type t2.micro \
+            --instance-type "$INSTANCE_TYPE" \
             --envvars SPRING_PROFILES_ACTIVE=prod,SPRING_DATASOURCE_URL="jdbc:postgresql://$RDS_ENDPOINT:5432/cinepass",SPRING_DATASOURCE_USERNAME="$RDS_USER",SPRING_DATASOURCE_PASSWORD="$RDS_PASSWORD"
 
         echo -e "${GREEN}Environment created${NC}"

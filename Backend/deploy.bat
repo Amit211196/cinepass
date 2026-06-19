@@ -46,6 +46,25 @@ if errorlevel 1 (
 )
 
 echo Build successful
+
+REM Prepare root-level JAR required by Elastic Beanstalk Java SE (or use Procfile)
+set JAR_FILE=
+for /f "delims=" %%F in ('dir /b /a:-d /o:-d "target\*.jar" 2^>nul ^| findstr /V /I "\.original\.jar"') do (
+    if not defined JAR_FILE set JAR_FILE=%%F
+)
+
+if "!JAR_FILE!"=="" (
+    echo ERROR: No runnable JAR found in target directory
+    exit /b 1
+)
+
+copy /Y "target\!JAR_FILE!" "application.jar" >nul
+if errorlevel 1 (
+    echo ERROR: Failed to create application.jar at project root
+    exit /b 1
+)
+
+echo Prepared application.jar from target\!JAR_FILE!
 echo.
 
 REM Initialize Elastic Beanstalk
@@ -73,12 +92,9 @@ REM Deploy to Elastic Beanstalk
 echo Deploying to Elastic Beanstalk...
 
 REM Check if environment exists
-for /f "tokens=*" %%A in ('eb list 2^>nul') do (
-    echo !line! | findstr /R "^\*" >nul
-    if !errorlevel!==0 (
-        set ENV_NAME=%%A
-        set ENV_NAME=!ENV_NAME:*=!
-    )
+for /f "delims=" %%A in ('eb list 2^>nul ^| findstr /R "^\*"') do (
+    set ENV_NAME=%%A
+    set ENV_NAME=!ENV_NAME:*=!
 )
 
 if "!ENV_NAME!"=="" (
@@ -93,9 +109,12 @@ if "!ENV_NAME!"=="" (
 
     set /p RDS_PASSWORD="Enter RDS password: "
 
+    set /p INSTANCE_TYPE="Enter EC2 instance type (default: t3.micro): "
+    if "!INSTANCE_TYPE!"=="" set INSTANCE_TYPE=t3.micro
+
     echo Creating environment !ENV_NAME!...
     call eb create !ENV_NAME! ^
-        --instance-type t2.micro ^
+        --instance-type !INSTANCE_TYPE! ^
         --envvars SPRING_PROFILES_ACTIVE=prod,SPRING_DATASOURCE_URL="jdbc:postgresql://!RDS_ENDPOINT!:5432/cinepass",SPRING_DATASOURCE_USERNAME="!RDS_USER!",SPRING_DATASOURCE_PASSWORD="!RDS_PASSWORD!"
 
     echo Environment created
