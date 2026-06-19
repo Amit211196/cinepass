@@ -56,7 +56,7 @@ aws rds create-db-instance \
     --db-instance-identifier "$DB_INSTANCE_ID" \
     --db-instance-class db.t3.micro \
     --engine postgres \
-    --engine-version 15.3 \
+    --engine-version 18.4 \
     --master-username "$DB_USER" \
     --master-user-password "$DB_PASSWORD" \
     --allocated-storage "$STORAGE" \
