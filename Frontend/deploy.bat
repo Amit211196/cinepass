@@ -63,7 +63,7 @@ REM Create S3 bucket
 set /p BUCKET_NAME="Enter S3 bucket name (must be globally unique, e.g., cinepass-frontend-): "
 
 echo Creating S3 bucket: !BUCKET_NAME!
-call aws s3 mb s3://!BUCKET_NAME! --region us-east-1
+call aws s3 mb s3://!BUCKET_NAME! --region ap-south-1
 
 if errorlevel 1 (
     echo Note: Bucket may already exist. Continuing...
@@ -77,7 +77,7 @@ echo Configuring S3 for static website hosting...
 call aws s3 website s3://!BUCKET_NAME!/ ^
     --index-document index.html ^
     --error-document index.html ^
-    --region us-east-1
+    --region ap-south-1
 
 REM Create bucket policy
 (
@@ -104,7 +104,7 @@ echo.
 
 REM Upload to S3
 echo Uploading frontend to S3...
-call aws s3 sync dist/ s3://!BUCKET_NAME!/ --delete --region us-east-1
+call aws s3 sync dist/ s3://!BUCKET_NAME!/ --delete --region ap-south-1
 echo Upload complete
 echo.
 
@@ -115,7 +115,7 @@ echo.
 
 echo Next steps:
 echo 1. Create CloudFront distribution manually in AWS Console
-echo    - Origin: !BUCKET_NAME!.s3.us-east-1.amazonaws.com
+echo    - Origin: !BUCKET_NAME!.s3.ap-south-1.amazonaws.com
 echo    - Default Root Object: index.html
 echo    - Viewer Protocol Policy: Redirect HTTP to HTTPS
 echo.

@@ -55,7 +55,7 @@ create_s3_bucket() {
 
     if aws s3 ls "s3://$BUCKET_NAME" 2>&1 | grep -q 'NoSuchBucket'; then
         echo -e "${YELLOW}Creating S3 bucket: $BUCKET_NAME${NC}"
-        aws s3 mb "s3://$BUCKET_NAME" --region us-east-1
+        aws s3 mb "s3://$BUCKET_NAME" --region ap-south-1
         echo -e "${GREEN}Bucket created${NC}"
     else
         echo -e "${GREEN}Bucket already exists${NC}"
@@ -74,7 +74,7 @@ configure_s3_website() {
     aws s3 website "s3://$BUCKET_NAME/" \
         --index-document index.html \
         --error-document index.html \
-        --region us-east-1
+        --region ap-south-1
 
     # Set bucket policy for public read
     cat > /tmp/bucket-policy.json << EOF
@@ -103,7 +103,7 @@ upload_to_s3() {
 
     echo -e "${YELLOW}Uploading frontend to S3...${NC}"
 
-    aws s3 sync dist/ "s3://$BUCKET_NAME/" --delete --region us-east-1
+    aws s3 sync dist/ "s3://$BUCKET_NAME/" --delete --region ap-south-1
 
     echo -e "${GREEN}Upload complete${NC}"
 }
@@ -125,7 +125,7 @@ create_cloudfront_distribution() {
     "Items": [
       {
         "Id": "S3Origin",
-        "DomainName": "$BUCKET_NAME.s3.us-east-1.amazonaws.com",
+        "DomainName": "$BUCKET_NAME.s3.ap-south-1.amazonaws.com",
         "S3OriginConfig": {
           "OriginAccessIdentity": ""
         }
