@@ -30,6 +30,15 @@ if errorlevel 1 (
 echo All prerequisites satisfied
 echo.
 
+set /p BACKEND_API_URL="Enter backend API URL (e.g., http://your-eb-url/api) or leave blank for localhost: "
+if not "!BACKEND_API_URL!"=="" (
+    set VITE_API_BASE_URL=!BACKEND_API_URL!
+    echo Using API base URL: !VITE_API_BASE_URL!
+) else (
+    echo No API URL provided, using default localhost API URL
+)
+echo.
+
 REM Install dependencies and build
 echo Installing dependencies and building frontend...
 call npm install
